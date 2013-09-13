@@ -37,7 +37,7 @@
 #include <signal.h>
 #include <mosquitto.h>
 
-#define DEFAULT_PREFIX	"/system/%s/chronos"	/* Up to three %s are replaced by nodename */
+#define DEFAULT_PREFIX	"system/%s/chronos"	/* Up to three %s are replaced by nodename */
 #ifndef TRUE
 # define TRUE (1)
 #endif
@@ -261,9 +261,11 @@ int main(int argc, char **argv)
 		/* FIXME */
 		// mosquitto_tls_opts_set(m, SSL_VERIFY_PEER, "tlsv1", NULL);
 		
-		/* FIXME detect 1.2 */
 		if (tls_insecure) {
-			// mosquitto_tls_insecure_set(m, TRUE);
+#if LIBMOSQUITTO_VERSION_NUMBER >= 1002000
+			/* mosquitto_tls_insecure_set() requires libmosquitto 1.2. */
+			mosquitto_tls_insecure_set(m, TRUE);
+#endif
 		}
 	}
 
