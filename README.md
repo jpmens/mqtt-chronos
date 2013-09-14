@@ -15,7 +15,7 @@ _mqtt-chronos_ understands the following options:
 * `-C` specify the path to a PEM-encoded CA certificate for connecting to a broker over TLS.
 * `-U` use UTC (default: True)
 * `-L` use localtime (default: False)
-* `-I` use TLS PSK. This is the identity string.
+* `-I` use TLS PSK. This is the identity string. (see [Mosquitto])
 * `-K` use TLS PSK. This is the key string.
 
 ## Example
