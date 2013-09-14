@@ -132,7 +132,7 @@ void slices(char *prefix, char *zone, struct tm *initt, struct tm *tm, time_t ti
 	if (initt->tm_sec != tm->tm_sec) {
 		pub_i(prefix, zone, "second", initt->tm_sec = tm->tm_sec, FALSE);
 	}
-	pub_i(prefix, zone, "tics", tics, FALSE);
+	pub_i(prefix, zone, "epoch", tics, FALSE);
 	pub_ftime(prefix, zone, "time", "%H:%M:%S", tm, FALSE);
 }
 
