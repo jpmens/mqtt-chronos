@@ -37,7 +37,7 @@
 #include <signal.h>
 #include <mosquitto.h>
 
-#define DEFAULT_PREFIX	"/system/%s/chronos"	/* Up to three %s are replaced by nodename */
+#define DEFAULT_PREFIX	"system/%s/chronos"	/* Up to three %s are replaced by nodename */
 #ifndef TRUE
 # define TRUE (1)
 #endif
