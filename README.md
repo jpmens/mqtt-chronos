@@ -54,7 +54,7 @@ system/tiggr/chronos/utc/time 17:00:41
 ## Note
 
 * _mqtt-chronos_ publishes a non-retained topic `uptime` specifying for how long it has been up; the value is in seconds.
-* Specifying both `-U` and `-L` effectively disable all time publishes except `uptime`. This is a really, really cool feature. :-)
+* Specifying both `-U` and `-L` effectively disables all time publishes except `uptime`. This is a really, really cool feature. :-)
 
   [mqtt]: http://mqtt.org
   [mosquitto]: http://mosquitto.org
