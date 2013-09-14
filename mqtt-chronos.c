@@ -69,6 +69,10 @@ void pub(char *prefix ,char *zone, char *topic, char *str, int retain)
 	fulltopic = malloc(strlen(prefix) + 
 		((zone) ? strlen(zone) : 0) +
 		strlen(topic) + 12);
+	if (fulltopic == NULL) {
+		fprintf(stderr, "ENOMEM\n");
+		return;
+	}
 
 	if (zone) {
 		sprintf(fulltopic, "%s/%s/%s", prefix, zone, topic);
@@ -80,6 +84,7 @@ void pub(char *prefix ,char *zone, char *topic, char *str, int retain)
 	if (rc != MOSQ_ERR_SUCCESS) {
 		fprintf(stderr, "Cannot publish: %s\n", mosquitto_strerror(rc));
 	}
+
 	free(fulltopic);
 }
 
@@ -221,6 +226,8 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
+	/* Find nodename; chop at first '.' */
+
 	if (uname(&uts) == 0) {
 		char *p;
 		nodename = strdup(uts.nodename);
@@ -277,7 +284,10 @@ int main(int argc, char **argv)
 
 	mosquitto_loop_start(m);
 
-	topic = malloc(strlen(prefix) + (3 * strlen(nodename)) + 12);
+	if ((topic = malloc(strlen(prefix) + (3 * strlen(nodename)) + 12)) == NULL) {
+		fprintf(stderr, "ENOMEM\n");
+		goto abort;
+	}
 	sprintf(topic, prefix, nodename, nodename, nodename);
 
 	memset(&gmt_init, 0, sizeof(struct tm));
@@ -290,6 +300,9 @@ int main(int argc, char **argv)
 		sleep(interval);
 	}
 
+	free(topic);
+
+   abort:
 	free(nodename);
 
 	mosquitto_disconnect(m);
