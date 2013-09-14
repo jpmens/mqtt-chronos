@@ -102,8 +102,6 @@ void pub_ftime(char *prefix, char *zone, char *topic, char *fmt, struct tm *tm, 
 
 void slices(char *prefix, char *zone, struct tm *initt, struct tm *tm, time_t tics)
 {
-	pub_i(prefix, zone, "tics", tics, FALSE);
-
 	if (initt->tm_year != tm->tm_year) {
 		initt->tm_year = tm->tm_year;
 		pub_i(prefix, zone, "year", tm->tm_year + 1900, TRUE);
@@ -129,9 +127,8 @@ void slices(char *prefix, char *zone, struct tm *initt, struct tm *tm, time_t ti
 	if (initt->tm_sec != tm->tm_sec) {
 		pub_i(prefix, zone, "second", initt->tm_sec = tm->tm_sec, FALSE);
 	}
-	if (initt->tm_min != tm->tm_min || initt->tm_sec != initt->tm_sec) {
-		pub_ftime(prefix, zone, "time", "%H:%M:%S", tm, FALSE);
-	}
+	pub_i(prefix, zone, "tics", tics, FALSE);
+	pub_ftime(prefix, zone, "time", "%H:%M:%S", tm, FALSE);
 }
 
 /*
