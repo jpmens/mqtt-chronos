@@ -24,7 +24,7 @@ Starting _mqtt-chronos_ with a 60 second interval. (Blank lines show where the b
 
 ```
 system/tiggr/chronos/uptime 0
-system/tiggr/chronos/utc/tics 1379091521
+system/tiggr/chronos/utc/epoch 1379091521
 system/tiggr/chronos/utc/year 2013
 system/tiggr/chronos/utc/month 9
 system/tiggr/chronos/utc/day 13
@@ -39,12 +39,12 @@ system/tiggr/chronos/utc/second 41
 system/tiggr/chronos/utc/time 16:58:41
 
 system/tiggr/chronos/uptime 60
-system/tiggr/chronos/utc/tics 1379091581
+system/tiggr/chronos/utc/epoch 1379091581
 system/tiggr/chronos/utc/minute 59
 system/tiggr/chronos/utc/time 16:59:41
 
 system/tiggr/chronos/uptime 120
-system/tiggr/chronos/utc/tics 1379091641
+system/tiggr/chronos/utc/epoch 1379091641
 system/tiggr/chronos/utc/hour 17
 system/tiggr/chronos/utc/ampm PM
 system/tiggr/chronos/utc/minute 0

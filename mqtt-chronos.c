@@ -36,6 +36,7 @@
 #include <sys/utsname.h>
 #include <signal.h>
 #include <mosquitto.h>
+#include <pthread.h>
 
 #define DEFAULT_PREFIX	"system/%s/chronos"	/* Up to three %s are replaced by nodename */
 #ifndef TRUE
@@ -45,9 +46,15 @@
 # define FALSE (0)
 #endif
 
+#define PROGNAME "mqtt-chronos"
+
 time_t start_tics;
 struct mosquitto *m = NULL;
 int do_utc = TRUE, do_local = FALSE;
+
+struct udata {
+	int mid;
+};
 
 void catcher(int sig)
 {
@@ -61,11 +68,38 @@ void catcher(int sig)
 	exit(1);
 }
 
+void fatal(void)
+{
+	if (m) {
+		mosquitto_disconnect(m);
+		mosquitto_loop_stop(m, false);
+		mosquitto_lib_cleanup();
+	}
+	exit(1);
+}
+
+void cb_pub(struct mosquitto *mosq, void *userdata, int pmid)
+{
+	// printf("cb_pub: mid = %d\n", pmid);
+}
+
+void cb_disconnect(struct mosquitto *mosq, void *userdata, int rc)
+{
+	if (rc == 0) {
+		// Disconnect requested by client
+	} else {
+		fprintf(stderr, "%s: disconnected: reason: %d\n", PROGNAME, rc);
+		fatal();
+	}
+}
+
 void pub(char *prefix ,char *zone, char *topic, char *str, int retain)
 {
 	char *fulltopic;
 	int rc;
-	
+	int qos = 2;
+	int mid;
+
 	fulltopic = malloc(strlen(prefix) + 
 		((zone) ? strlen(zone) : 0) +
 		strlen(topic) + 12);
@@ -80,10 +114,12 @@ void pub(char *prefix ,char *zone, char *topic, char *str, int retain)
 		sprintf(fulltopic, "%s/%s", prefix, topic);
 	}
 	// printf("%s %s\n", fulltopic, str); fflush(stdout);
-	rc = mosquitto_publish(m, NULL, fulltopic, strlen(str), str, 0, retain);
+	rc = mosquitto_publish(m, &mid, fulltopic, strlen(str), str, qos, retain);
 	if (rc != MOSQ_ERR_SUCCESS) {
 		fprintf(stderr, "Cannot publish: %s\n", mosquitto_strerror(rc));
+		fatal();
 	}
+	// printf("PUB mid %d\n", mid);
 
 	free(fulltopic);
 }
@@ -107,6 +143,7 @@ void pub_ftime(char *prefix, char *zone, char *topic, char *fmt, struct tm *tm, 
 
 void slices(char *prefix, char *zone, struct tm *initt, struct tm *tm, time_t tics)
 {
+#if 0
 	if (initt->tm_year != tm->tm_year) {
 		initt->tm_year = tm->tm_year;
 		pub_i(prefix, zone, "year", tm->tm_year + 1900, TRUE);
@@ -133,6 +170,7 @@ void slices(char *prefix, char *zone, struct tm *initt, struct tm *tm, time_t ti
 		pub_i(prefix, zone, "second", initt->tm_sec = tm->tm_sec, FALSE);
 	}
 	pub_i(prefix, zone, "epoch", tics, FALSE);
+#endif
 	pub_ftime(prefix, zone, "time", "%H:%M:%S", tm, FALSE);
 }
 
@@ -173,6 +211,9 @@ int main(int argc, char **argv)
 	int do_tls = FALSE, tls_insecure = FALSE;
 	int do_psk = FALSE;
 	char *psk_key = NULL, *psk_identity = NULL;
+	struct udata udata;
+
+	udata.mid = 17;
 
 	while ((ch = getopt(argc, argv, "i:t:h:p:C:LUK:I:")) != EOF) {
 		switch (ch) {
@@ -241,7 +282,7 @@ int main(int argc, char **argv)
 	mosquitto_lib_init();
 
 	sprintf(clientid, "mqtt-tics-%d", getpid());
-	m = mosquitto_new(clientid, TRUE, NULL);
+	m = mosquitto_new(clientid, TRUE, (void *)&udata);
 	if (!m) {
 		fprintf(stderr, "Out of memory.\n");
 		exit(1);
@@ -273,6 +314,8 @@ int main(int argc, char **argv)
 		}
 	}
 
+	mosquitto_publish_callback_set(m, cb_pub);
+	mosquitto_disconnect_callback_set(m, cb_disconnect);
 	if ((rc = mosquitto_connect(m, host, port, keepalive)) != MOSQ_ERR_SUCCESS) {
 		fprintf(stderr, "Unable to connect to %s:%d: %s\n", host, port,
 			mosquitto_strerror(rc));

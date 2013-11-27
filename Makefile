@@ -1,5 +1,5 @@
 
-CFLAGS=-Wall -Werror
+CFLAGS=-g -Wall -Werror
 LDFLAGS=-lmosquitto
 
 all: mqtt-chronos
