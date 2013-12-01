@@ -37,6 +37,7 @@
 #include <signal.h>
 #include <mosquitto.h>
 #include <pthread.h>
+#include <errno.h>
 
 #define DEFAULT_PREFIX	"system/%s/chronos"	/* Up to three %s are replaced by nodename */
 #ifndef TRUE
@@ -88,7 +89,8 @@ void cb_disconnect(struct mosquitto *mosq, void *userdata, int rc)
 	if (rc == 0) {
 		// Disconnect requested by client
 	} else {
-		fprintf(stderr, "%s: disconnected: reason: %d\n", PROGNAME, rc);
+		fprintf(stderr, "%s: disconnected: reason: %d (%s)\n",
+			PROGNAME, rc, strerror(errno));
 		fatal();
 	}
 }
